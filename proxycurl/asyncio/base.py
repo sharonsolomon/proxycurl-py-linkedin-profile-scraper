@@ -25,7 +25,6 @@ class Result(Generic[T]):
     success: bool
     value: T
     error: BaseException
-    input: Op
     phone_number: str  # Add this line to include the phone number
 
 
@@ -163,8 +162,8 @@ async def _worker(queue, results):
         try:
             response = await op[0](**op[1])
             phone_number = op[1].get('phone_number')  # Extract the phone number from the input
-            results[index] = Result(True, response, None, op, phone_number)  # Include the phone number
+            results[index] = Result(True, response, None, phone_number)  # Include the phone number
         except Exception as e:
             phone_number = op[1].get('phone_number')  # Extract the phone number from the input
-            results[index] = Result(False, None, e, op, phone_number)  # Include the phone number
+            results[index] = Result(False, None, e, phone_number)  # Include the phone number
         queue.task_done()
