@@ -59,7 +59,9 @@ async def process_batch():
     while True:
         rows = fetch_rows_from_bq()
         if not rows:
-            break
+            print("No more rows to process. Waiting before next check...")
+            await asyncio.sleep(60)  # Wait for 1 minute before checking again
+            continue
 
         bulk_linkedin_person_data = [(proxycurl.linkedin.person.get, {'linkedin_profile_url': row}) for row in rows]
         results = await do_bulk(bulk_linkedin_person_data)
