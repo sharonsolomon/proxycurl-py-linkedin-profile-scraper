@@ -25,6 +25,7 @@ class Result(Generic[T]):
     success: bool
     value: T
     error: BaseException
+    input: Op
 
 
 class ProxycurlException(Exception):
@@ -159,7 +160,7 @@ async def _worker(queue, results):
 
         try:
             response = await op[0](**op[1])
-            results[index] = Result(True, response, None)
+            results[index] = Result(True, response, None, op)
         except Exception as e:
-            results[index] = Result(False, None, e)
+            results[index] = Result(False, None, e, op)
         queue.task_done()
