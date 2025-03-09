@@ -26,6 +26,8 @@ class Result(Generic[T]):
     value: T
     error: BaseException
     input: Op
+    phone_number: str  # Add this line to include the phone number
+
 
 
 class ProxycurlException(Exception):
@@ -160,7 +162,9 @@ async def _worker(queue, results):
 
         try:
             response = await op[0](**op[1])
-            results[index] = Result(True, response, None, op)
+            phone_number = op[1].get('phone_number')  # Extract the phone number from the input
+            results[index] = Result(True, response, None, op, phone_number)  # Include the phone number
         except Exception as e:
-            results[index] = Result(False, None, e, op)
+            phone_number = op[1].get('phone_number')  # Extract the phone number from the input
+            results[index] = Result(False, None, e, op, phone_number)  # Include the phone number
         queue.task_done()
