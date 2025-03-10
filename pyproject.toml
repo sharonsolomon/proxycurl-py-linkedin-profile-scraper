@@ -9,13 +9,16 @@ packages = [
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "3.7.17"
+
 
 gevent = { version = "^22.10.2", optional = true }
 requests = { version = "^2.25.0", optional = true }
 aiohttp = { version = "^3.7.4", optional = true }
 Twisted = { version = "^21.7.0", optional = true }
 treq = { version = "^21.5.0", optional = true }
+
+
 
 [tool.poetry.extras]
 gevent = ["gevent", "requests"]
