@@ -9,7 +9,7 @@ packages = [
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "3.7.17"
+python = "^3.7"
 
 
 gevent = { version = "^22.10.2", optional = true }
