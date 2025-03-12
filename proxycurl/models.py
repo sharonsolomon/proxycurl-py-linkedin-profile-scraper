@@ -504,6 +504,7 @@ class ReverseEmailUrlEnrichResult(TypedDict):
     backwards_compatibility_notes: Optional[str]
     profile: Optional[PersonEndpointResponse]
     last_updated: Optional[str]
+    email: Optional[str]
 
 
 class ReverseContactNumberResult(TypedDict):
