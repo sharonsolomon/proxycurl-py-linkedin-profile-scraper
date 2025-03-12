@@ -165,9 +165,12 @@ async def _worker(queue, results):
             print(op)
             phone_number = op[1].get('phone_number') # Extract the phone number from the input
             email = op[1].get('email') #
+            logger.debug(f"op[1]: {op[1]}")  # Log the contents of op[1]
+
             results[index] = Result(True, response, None, phone_number, email)  # Include the phone number
         except Exception as e:
             phone_number = op[1].get('phone_number')   # Extract the phone number from the input
             email =  op[1].get('email')   # Extract the phone number from the input
+            logger.debug(f"op[1]: {op[1]}")  # Log the contents of op[1]
             results[index] = Result(False, None, e, phone_number, email)  # Include the phone number
         queue.task_done()
