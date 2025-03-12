@@ -714,7 +714,7 @@ class _LinkedinPerson:
             },
             result_class=ReverseEmailUrlEnrichResult
         )
-        return resp
+        return Result(True, resp, None, None, email)
 
     async def resolve_by_phone(
         self,
