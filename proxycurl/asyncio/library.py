@@ -53,10 +53,10 @@ class _LinkedinPerson:
         linkedin_profile_url: str = None,
     ) -> Awaitable[PersonEndpointResponse]:
         """Person Profile Endpoint
-        
+
                 Cost: 1 credit / successful request.
         Get structured data of a Personal Profile
-        
+
         :param extra: Enriches the Person Profile with extra details from external sources.
             Extra details include gender, birth date, industry and interests.
 
@@ -240,14 +240,14 @@ class _LinkedinPerson:
         after: str = None,
     ) -> Awaitable[PersonSearchResult]:
         """Person Search Endpoint
-        
+
                 Cost: 35 credits / successful request base charge.
         Search for people who meet a set of criteria within our exhaustive dataset of people profiles.
 
         This API endpoint is powered by [LinkDB](https://nubela.co/proxycurl/linkdb), our exhaustive dataset of people and company profiles.
 
         This API endpoint can return at most 10,000 results per search.
-        
+
         :param country: Filter people located in this country.
             This parameter accepts a case-insensitive [Alpha-2 ISO3166 country code](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2).
         :type country: str
@@ -576,10 +576,10 @@ class _LinkedinPerson:
         last_name: str = None,
     ) -> Awaitable[PersonLookupUrlEnrichResult]:
         """Person Lookup Endpoint
-        
+
                 Cost: 2 credits / successful request.
         Look up a person with a name and company information.
-        
+
         :param first_name: First name of the user
         :type first_name: str
         :param company_domain: Company name or domain
@@ -665,11 +665,11 @@ class _LinkedinPerson:
         enrich_profile: str = None,
     ) -> Awaitable[ReverseEmailUrlEnrichResult]:
         """Reverse Email Lookup Endpoint
-        
+
                 Cost: 3 credits / successful request.
         Resolve social media profiles correlated from an email address.
         This API endpoint works with both personal and work emails.
-        
+
         :param email: Email address of the user you want to look up.
         :type email: str
         :param lookup_depth: This parameter describes the depth options for our API lookup function. This endpoint can execute either a superficial or a deep lookup.
@@ -688,7 +688,7 @@ class _LinkedinPerson:
             Valid values are:
 
             * `skip` (default): do not enrich the results with cached profile data.
-            * `enrich`: enriches the result with cached profile data. 
+            * `enrich`: enriches the result with cached profile data.
 
             Calling this API endpoint with this parameter would add `1` additional credit.
 
@@ -721,10 +721,10 @@ class _LinkedinPerson:
         phone_number: str,
     ) -> Awaitable[ReverseContactNumberResult]:
         """Reverse Contact Number Lookup Endpoint
-        
+
                 Cost: 3 credits / successful request.
         Find social media profiles from a contact phone number.
-        
+
         :param phone_number: [E.164 formatted](https://www.twilio.com/docs/glossary/what-e164) phone number of the person you want to identify social media profiles of.
         :type phone_number: str
         :return: An object of Awaitable[:class:`proxycurl.models.ReverseContactNumberResult]` or **None** if there is an error.
@@ -752,7 +752,7 @@ class _LinkedinPerson:
         callback_url: str = None,
     ) -> Awaitable[ExtractionEmailResult]:
         """Work Email Lookup Endpoint
-        
+
                 Cost: 3 credits / request.
         Lookup work email address of a LinkedIn Person Profile.
 
@@ -765,7 +765,7 @@ class _LinkedinPerson:
 
         If you provided a webhook in your request parameter, our application will call your webhook with
         the result once. See `Webhook request` below.
-        
+
         :param linkedin_profile_url: Linkedin Profile URL of the person you want to
             extract work email address from.
         :type linkedin_profile_url: str
@@ -801,10 +801,10 @@ class _LinkedinPerson:
         linkedin_profile_url: str = None,
     ) -> Awaitable[PersonalContactNumbers]:
         """Personal Contact Number Lookup Endpoint
-        
+
                 Cost: 1 credit / contact number returned.
         Find personal phone numbers associated with a given social media profile.
-        
+
         :param page_size: This controls the maximum number of numbers returned per API call.
             It's useful for limiting credit consumption as the number of numbers
             per identity can vary. The default value is 0, meaning there's no limit
@@ -866,10 +866,10 @@ class _LinkedinPerson:
         linkedin_profile_url: str = None,
     ) -> Awaitable[PDLEmailResult]:
         """Personal Email Lookup Endpoint
-        
+
                 Cost: 1 credit / email returned.
         Find personal email addresses associated with a given social media profile.
-        
+
         :param email_validation: How to validate each email.
 
             Takes the following values:
@@ -925,13 +925,13 @@ class _LinkedinPerson:
         linkedin_person_profile_url: str,
     ) -> Awaitable[ProfilePicture]:
         """Person Profile Picture Endpoint
-        
+
                 Cost: 0 credit / successful request.
         Get the profile picture of a person.
 
         Profile pictures are served from cached people profiles found within [LinkDB](https://nubela.co/proxycurl/linkdb).
         If the profile does not exist within [LinkDB](https://nubela.co/proxycurl/linkdb), then the API will return a `404` status code.
-        
+
         :param linkedin_person_profile_url: LinkedIn Profile URL of the person that you are trying to get the profile picture of.
         :type linkedin_person_profile_url: str
         :return: An object of Awaitable[:class:`proxycurl.models.ProfilePicture]` or **None** if there is an error.
@@ -970,10 +970,10 @@ class _LinkedinCompany:
         use_cache: str = None,
     ) -> Awaitable[LinkedinCompany]:
         """Company Profile Endpoint
-        
+
                 Cost: 1 credit / successful request.
         Get structured data of a Company Profile
-        
+
         :param url: URL of the LinkedIn Company Profile to crawl.
 
             URL should be in the format of `https://www.linkedin.com/company/<public_identifier>`
@@ -1076,7 +1076,7 @@ class _LinkedinCompany:
         after: str = None,
     ) -> Awaitable[CompanySearchResult]:
         """Company Search Endpoint
-        
+
                 Cost: 35 credits / successful request base charge.
         Search for companies that meet a set of criteria within
             our exhaustive dataset of company profiles.
@@ -1084,7 +1084,7 @@ class _LinkedinCompany:
             This API endpoint is powered by [LinkDB](https://nubela.co/proxycurl/linkdb), our exhaustive dataset of company profiles.
 
             This API endpoint can return at most of 10,000 results per search.
-        
+
         :param public_identifier_not_in_list: A list of public identifiers (the identifying portion of the company’s profile URL).
             The target company’s identifier must **not** be a member of this list.
         :type public_identifier_not_in_list: str
@@ -1242,11 +1242,11 @@ class _LinkedinCompany:
         enrich_profile: str = None,
     ) -> Awaitable[CompanyUrlEnrichResult]:
         """Company Lookup Endpoint
-        
+
                 Cost: 2 credits / successful request.
         Resolve Company LinkedIn Profile from company name,
             domain name and location.
-        
+
         :param company_location: The location / region of company.
             ISO 3166-1 alpha-2 codes
         :type company_location: str
@@ -1305,10 +1305,10 @@ class _LinkedinCompany:
         search_id: str = None,
     ) -> Awaitable[JobListPage]:
         """Job Search Endpoint
-        
+
                 Cost: 2 credits / successful request.
         List jobs posted by a company on LinkedIn
-        
+
         :param job_type: The nature of the job.
             It accepts the following 7 case-insensitive values only:
             - `full-time`
@@ -1396,10 +1396,10 @@ class _LinkedinCompany:
         search_id: str = None,
     ) -> Awaitable[JobListCount]:
         """Jobs Listing Count Endpoint
-        
+
                 Cost: 2 credits / successful request.
         Count number of jobs posted by a company on LinkedIn
-        
+
         :param job_type: The nature of the job.
             It accepts the following 7 case-insensitive values only:
             - `full-time`
@@ -1484,12 +1484,12 @@ class _LinkedinCompany:
         employment_status: str = None,
     ) -> Awaitable[EmployeeCount]:
         """Employee Count Endpoint
-        
+
                 Cost: 1 credit / successful request.
         Get a number of total employees of a Company.
 
         Get an employee count of this company from various sources.
-        
+
         :param url: URL of the LinkedIn Company Profile to target.
 
             URL should be in the format of `https://www.linkedin.com/company/<public_identifier>`
@@ -1553,12 +1553,12 @@ class _LinkedinCompany:
         after: str = None,
     ) -> Awaitable[EmployeeList]:
         """Employee Listing Endpoint
-        
+
                 Cost: 3 credits / employee returned.
         Get a list of employees of a Company.
 
         This API endpoint is powered by [LinkDB](https://nubela.co/proxycurl/linkdb), our comprehensive dataset of people and company profiles.
-        
+
         :param url: URL of the LinkedIn Company Profile to target.
 
             URL should be in the format of `https://www.linkedin.com/company/<public_identifier>`
@@ -1615,13 +1615,13 @@ class _LinkedinCompany:
 
             If this parameter is supplied with a value other than `none`, will add `50` credits to the base cost of the API endpoint regardless number of results returned. It will also add an additional cost of `10` credits per employee returned.
         :type sort_by: str
-        :param resolve_numeric_id: Enable support for Company Profile URLs with numerical IDs that you most frequently fetch from Sales Navigator. 
-            We achieve this by resolving numerical IDs into vanity IDs with cached company profiles from [LinkDB](https://nubela.co/proxycurl/linkdb). 
+        :param resolve_numeric_id: Enable support for Company Profile URLs with numerical IDs that you most frequently fetch from Sales Navigator.
+            We achieve this by resolving numerical IDs into vanity IDs with cached company profiles from [LinkDB](https://nubela.co/proxycurl/linkdb).
             For example, we will turn `https://www.linkedin.com/company/1234567890` to `https://www.linkedin.com/company/acme-corp` -- for which the API endpoint only supports the latter.
 
             This parameter accepts the following values:
             - `false` (default value) - Will not resolve numerical IDs.
-            - `true` - Enable support for Company Profile URLs with numerical IDs. 
+            - `true` - Enable support for Company Profile URLs with numerical IDs.
             Costs an extra `2` credit on top of the base cost of the endpoint.
         :type resolve_numeric_id: str
         :return: An object of Awaitable[:class:`proxycurl.models.EmployeeList]` or **None** if there is an error.
@@ -1670,14 +1670,14 @@ class _LinkedinCompany:
         after: str = None,
     ) -> Awaitable[EmployeeList]:
         """Employee Search Endpoint
-        
+
                 Cost: 10 credits / successful request.
         Search employees of a target by their job title. This API endpoint is syntactic
         sugar for the role_search parameter under the [Employee Listing Endpoint](#company-api-employee-listing-endpoint).
         This API endpoint is powered by [LinkDB](https://nubela.co/proxycurl/linkdb), our comprehensive dataset of people
         and company profiles. For a detailed comparison between this API endpoint
         and the [Role Lookup Endpoint](#people-api-role-lookup-endpoint) or the [Person Search Endpoint](#search-api-person-search-endpoint), refer to [this article](https://nubela.co/blog/what-is-the-difference-between-the-person-search-endpoint-role-lookup-endpoint-and-the-employee-search-endpoint).
-        
+
         :param keyword_regex: Job title keyword to search for in regular expression format.
 
             The accepted value for this parameter is a **case-insensitive** regular expression.
@@ -1706,13 +1706,13 @@ class _LinkedinCompany:
 
             Calling this API endpoint with this parameter would add `1` credit per employee returned.
         :type enrich_profiles: str
-        :param resolve_numeric_id: Enable support for Company Profile URLs with numerical IDs that you most frequently fetch from Sales Navigator. 
-            We achieve this by resolving numerical IDs into vanity IDs with cached company profiles from [LinkDB](https://nubela.co/proxycurl/linkdb). 
+        :param resolve_numeric_id: Enable support for Company Profile URLs with numerical IDs that you most frequently fetch from Sales Navigator.
+            We achieve this by resolving numerical IDs into vanity IDs with cached company profiles from [LinkDB](https://nubela.co/proxycurl/linkdb).
             For example, we will turn `https://www.linkedin.com/company/1234567890` to `https://www.linkedin.com/company/acme-corp` -- for which the API endpoint only supports the latter.
 
             This parameter accepts the following values:
             - `false` (default value) - Will not resolve numerical IDs.
-            - `true` - Enable support for Company Profile URLs with numerical IDs. 
+            - `true` - Enable support for Company Profile URLs with numerical IDs.
             Costs an extra `2` credit on top of the base cost of the endpoint.
         :type resolve_numeric_id: str
         :return: An object of Awaitable[:class:`proxycurl.models.EmployeeList]` or **None** if there is an error.
@@ -1752,7 +1752,7 @@ class _LinkedinCompany:
         enrich_profile: str = None,
     ) -> Awaitable[RoleSearchEnrichedResult]:
         """Role Lookup Endpoint
-        
+
                 Cost: 3 credits / successful request.
         Returns the profile of a person who most closely matches a specified role
         in a company. For instance, it can be used to identify the "CTO" of
@@ -1762,7 +1762,7 @@ class _LinkedinCompany:
         or the [Person Search Endpoint](#search-api-person-search-endpoint),
         refer to [this article](
             https://nubela.co/blog/what-is-the-difference-between-the-person-search-endpoint-role-lookup-endpoint-and-the-employee-search-endpoint).
-        
+
         :param company_name: Name of the company that you are searching for
         :type company_name: str
         :param role: Role of the profile that you are lookin up
@@ -1806,13 +1806,13 @@ class _LinkedinCompany:
         linkedin_company_profile_url: str,
     ) -> Awaitable[ProfilePicture]:
         """Company Profile Picture Endpoint
-        
+
                 Cost: 0 credit / successful request.
         Get the profile picture of a company.
 
         Profile pictures are served from cached company profiles found within [LinkDB](https://nubela.co/proxycurl/linkdb).
         If the profile does not exist within [LinkDB](https://nubela.co/proxycurl/linkdb), then the API will return a `404` status code.
-        
+
         :param linkedin_company_profile_url: LinkedIn Profile URL of the company that you are trying to get the profile picture of.
         :type linkedin_company_profile_url: str
         :return: An object of Awaitable[:class:`proxycurl.models.ProfilePicture]` or **None** if there is an error.
@@ -1845,10 +1845,10 @@ class _LinkedinSchool:
         use_cache: str = None,
     ) -> Awaitable[LinkedinSchool]:
         """School Profile Endpoint
-        
+
                 Cost: 1 credit / successful request.
         Get structured data of a LinkedIn School Profile
-        
+
         :param url: URL of the LinkedIn School Profile to crawl.
 
             URL should be in the format of `https://www.linkedin.com/school/<public_identifier>`
@@ -1890,10 +1890,10 @@ class _LinkedinSchool:
         resolve_numeric_id: str = None,
     ) -> Awaitable[StudentList]:
         """Student Listing Endpoint
-        
+
                 Cost: 3 credits / student returned.
         Get a list of students of a school or university.
-        
+
         :param linkedin_school_url: URL of the LinkedIn School Profile to target.
 
             URL should be in the format of `https://www.linkedin.com/school/<public_identifier>`
@@ -1949,13 +1949,13 @@ class _LinkedinSchool:
 
             If this parameter is supplied with a value other than `none`, will add `50` credits to the base cost of the API endpoint regardless number of results returned. It will also add an additional cost of `10` credits per student returned.
         :type sort_by: str
-        :param resolve_numeric_id: Enable support for School Profile URLs with numerical IDs that you most frequently fetch from Sales Navigator. 
-            We achieve this by resolving numerical IDs into vanity IDs with cached company profiles from [LinkDB](https://nubela.co/proxycurl/linkdb). 
+        :param resolve_numeric_id: Enable support for School Profile URLs with numerical IDs that you most frequently fetch from Sales Navigator.
+            We achieve this by resolving numerical IDs into vanity IDs with cached company profiles from [LinkDB](https://nubela.co/proxycurl/linkdb).
             For example, we will turn `https://www.linkedin.com/school/1234567890` to `https://www.linkedin.com/school/acme-corp` -- for which the API endpoint only supports the latter.
 
             This parameter accepts the following values:
             - `false` (default value) - Will not resolve numerical IDs.
-            - `true` - Enable support for School Profile URLs with numerical IDs. 
+            - `true` - Enable support for School Profile URLs with numerical IDs.
             Costs an extra `2` credit on top of the base cost of the endpoint.
         :type resolve_numeric_id: str
         :return: An object of Awaitable[:class:`proxycurl.models.StudentList]` or **None** if there is an error.
@@ -2001,10 +2001,10 @@ class _LinkedinJob:
         url: str,
     ) -> Awaitable[JobProfile]:
         """Job Profile Endpoint
-        
+
                 Cost: 2 credits / successful request.
         Get structured data of a LinkedIn Job Profile
-        
+
         :param url: URL of the LinkedIn Job Profile to target.
 
             URL should be in the format of
@@ -2044,10 +2044,10 @@ class _LinkedinCustomers:
         after: str = None,
     ) -> Awaitable[CustomerList]:
         """Customer Listing Endpoint
-        
+
                 Cost: 10 credits / result for users on an annual subscription or Enterprise plan.
         Get a list of probable corporate customers of a target company.
-        
+
         :param linkedin_company_profile_url: The LinkedIn Profile URL of the company from which you want to get a list of customers of.
 
             URL should be in the format of `https://www.linkedin.com/company/<public-identifier>`
@@ -2133,10 +2133,10 @@ class Proxycurl(ProxycurlBase):
         self,
     ) -> Awaitable[CreditBalance]:
         """View Credit Balance Endpoint
-        
+
                 Cost: 0 credit / successful request.
         Get your current credit(s) balance
-        
+
         :return: An object of Awaitable[:class:`proxycurl.models.CreditBalance]` or **None** if there is an error.
         :rtype: Awaitable[:class:`proxycurl.models.CreditBalance]`
         :raise ProxycurlException: Every error will raise a :class:`proxycurl.asyncio.ProxycurlException`
