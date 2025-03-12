@@ -2812,6 +2812,11 @@
         "type": "basic",
         "value": "str",
         "nullable": true
+      },
+      "email": {
+        "type": "basic",
+        "value": "str",
+        "nullable": true
       }
     },
     "ReverseContactNumberResult": {
