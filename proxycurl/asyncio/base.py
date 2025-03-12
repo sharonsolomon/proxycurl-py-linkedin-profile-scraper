@@ -162,6 +162,7 @@ async def _worker(queue, results):
 
         try:
             response = await op[0](**op[1])
+            print(op)
             phone_number = op[1].get('phone_number') # Extract the phone number from the input
             email = op[1].get('email') #
             results[index] = Result(True, response, None, phone_number, email)  # Include the phone number
