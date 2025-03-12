@@ -25,8 +25,9 @@ class Result(Generic[T]):
     success: bool
     value: T
     error: BaseException
-    phone_number: str  # Add this line to include the phone number
-    email: str  # Add this line to include the email
+    phone_number: str = None  # Add this line to include the phone number
+    email: str = None # Add this line to include the email
+
 
 
 
