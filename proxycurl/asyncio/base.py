@@ -11,44 +11,34 @@ from typing import (
     Tuple,
     Callable,
     Dict,
-    Optional # Added Optional for value/error
+    Optional # Keep Optional
 )
 import logging
 
-
 logger = logging.getLogger(__name__)
-logger.critical("<<<<< RUNNING MODIFIED base.py - v2 >>>>>")
-
 
 T = TypeVar('T')
+# op is a tuple: (callable_api_function, parameters_dict)
+# e.g., (proxycurl.linkedin.person.resolve_by_phone, {'phone_number': '...', 'email': None})
+# or    (proxycurl.linkedin.person.resolve_by_email, {'phone_number': None, 'email': '...'})
 Op = Tuple[Callable, Dict]
 
 
 @dataclass
 class Result(Generic[T]):
     success: bool
-    # Value is Optional because it won't exist on failure
-    value: Optional[T]
-    # Error is Optional because it won't exist on success
-    error: Optional[BaseException]
-    # Keep your additions for tracking
-    phone_number: Optional[str] = None # Make optional if not always present
-    email: Optional[str] = None        # Make optional if not always present
-
-
+    value: Optional[T] # Value exists on success
+    error: Optional[BaseException] # Error exists on failure
+    # These will store the identifier used for THIS specific operation attempt
+    phone_number: Optional[str] = None
+    email: Optional[str] = None
 
 class ProxycurlException(Exception):
     """Raised when InternalServerError or network error or request error"""
     pass
 
-
 class ProxycurlBase:
-    api_key: str
-    base_url: str
-    timeout: int
-    max_retries: int
-    max_backoff_seconds: int
-
+    # ... (Constructor __init__ remains the same) ...
     def __init__(
         self,
         api_key: str,
@@ -63,6 +53,9 @@ class ProxycurlBase:
         self.max_retries = max_retries
         self.max_backoff_seconds = max_backoff_seconds
 
+    # ... (request method remains the same as the improved version from the previous step) ...
+    # It correctly handles API calls, retries, and raises exceptions on failure
+    # including the TypeError -> ProxycurlException mapping if response structure mismatches.
     async def request(
         self,
         method: str,
@@ -75,13 +68,12 @@ class ProxycurlBase:
         header_dic = {'Authorization': 'Bearer ' + self.api_key}
         backoff_in_seconds = 1
         last_exception = None # Keep track of the last exception
-        logger.critical("<<<<< Entered MODIFIED request method >>>>>")
-
 
         for i in range(0, self.max_retries):
+            response_result = None
+            status = None
+            response_json = None # Initialize response_json here
             try:
-                response_result = None
-                status = None
                 session_kwargs = {'headers': header_dic, 'timeout': self.timeout}
 
                 async with aiohttp.ClientSession() as session:
@@ -94,83 +86,70 @@ class ProxycurlBase:
                             response_result = await response.read()
                             status = response.status
                     else:
-                        # Added to handle potential other methods if library expands
                         raise ValueError(f"Unsupported HTTP method: {method}")
 
                 if status in [200, 202]:
                     response_json = json.loads(response_result)
-                    # --- MODIFICATION START ---
                     # Directly attempt to instantiate. If it fails, the exception
-                    # will be caught by the outer try/except in this loop iteration
-                    # or propagate up if it's the last retry.
-                    # We no longer catch the exception here and return the dict.
+                    # will be caught by the outer try/except in this loop iteration.
                     return result_class(**response_json)
-                    # --- MODIFICATION END ---
                 else:
                     # Raise specific exception for non-2xx status codes
                     raise ProxycurlException(f"HTTP {status}: {response_result.decode('utf-8', errors='ignore')}")
 
             except (aiohttp.ClientError, asyncio.TimeoutError, ProxycurlException) as e:
-                # Catch network errors, timeouts, and specific non-2xx API errors
                 logger.warning(f"Request attempt {i+1}/{self.max_retries} failed for {url}. Error: {e}")
-                last_exception = e # Store the exception
-
-                # Decide on retry logic based on status or error type
+                last_exception = e
                 should_retry = False
-                if isinstance(e, ProxycurlException) and status:
-                    if status == 429: # Rate limit
+                # Simplified retry logic based on status if available
+                current_status = status if status else (e.response.status if hasattr(e, 'response') and hasattr(e.response, 'status') else None)
+
+                if isinstance(e, ProxycurlException) and current_status:
+                    if current_status == 429: # Rate limit
                         sleep = (backoff_in_seconds * 2 ** i)
                         await asyncio.sleep(min(self.max_backoff_seconds, sleep))
                         should_retry = True
-                    elif status >= 500: # Server errors
+                    elif current_status >= 500: # Server errors
                         should_retry = True
-                    # Add other retryable status codes if needed
                 elif isinstance(e, (aiohttp.ClientError, asyncio.TimeoutError)):
-                    # Retry on general network/timeout issues
+                     # Retry on general network/timeout issues
                     should_retry = True
 
                 if should_retry and i < self.max_retries - 1:
-                    await asyncio.sleep(min(self.max_backoff_seconds, (backoff_in_seconds * 2 ** i))) # Exponential backoff
-                    continue # Go to the next iteration
+                    # Apply backoff only if retrying
+                    await asyncio.sleep(min(self.max_backoff_seconds, (backoff_in_seconds * 2 ** i)))
+                    continue
                 else:
-                    raise e # Re-raise the last exception if retries exhausted or not retryable
+                    raise # Re-raise the last exception if retries exhausted or not retryable
 
             except json.JSONDecodeError as e:
-                # Catch errors parsing the response body
                 logger.error(f"Failed to decode JSON response for {url}. Status: {status}. Response: {response_result}. Error: {e}")
                 last_exception = e
-                # Generally, don't retry JSON errors unless you expect transient corruption
                 raise ProxycurlException(f"Invalid JSON response from API: {e}") from e
 
             except TypeError as e:
-                # --- MODIFICATION START ---
                 # Catch errors when **response_json doesn't match result_class fields
                 logger.error(f"Failed to map API response to result class for {url}. Status: {status}. Error: {e}. Response: {response_json}")
                 last_exception = e
-                # Treat this as a non-retryable error for this specific call
                 raise ProxycurlException(f"API response structure mismatch: {e}") from e
-                # --- MODIFICATION END ---
 
             except Exception as e:
-                # Catch any other unexpected error during the request process
                 logger.exception(f"Unexpected error during request to {url}. Attempt {i+1}/{self.max_retries}. Error: {e}")
                 last_exception = e
-                # Retry potentially unexpected transient errors? Maybe, depending on policy.
                 if i < self.max_retries - 1:
                      await asyncio.sleep(min(self.max_backoff_seconds, (backoff_in_seconds * 2 ** i)))
                      continue
                 else:
-                    raise ProxycurlException(f"Unexpected error after retries: {e}") from e
+                    # Use f-string for better error message formatting
+                    raise ProxycurlException(f"Unexpected error after {self.max_retries} retries: {e}") from e
 
-        # This part should ideally not be reached if the loop always raises or returns
-        # But as a fallback, raise the last known exception
-        if last_exception:
-            raise last_exception
-        else:
-            # Should not happen if max_retries >= 1
-            raise ProxycurlException("Request failed after retries for unknown reasons.")
+        # Fallback raise if loop finishes without returning or raising explicitly
+        # (Should ideally not be reached with proper loop control)
+        raise last_exception if last_exception else ProxycurlException("Request failed after retries for unknown reasons.")
 
 
+# ... (do_bulk function remains the same as the improved version) ...
+# It correctly handles queueing, workers, cancellation, and checking for missing results.
 async def do_bulk(
     ops: List[Op],
     max_workers: int = MAX_WORKERS
@@ -200,73 +179,105 @@ async def do_bulk(
     await asyncio.gather(*workers, return_exceptions=True)
 
     # Ensure all results are populated (handle potential edge cases where a worker died unexpectedly)
-    # This might be overkill if _worker is robust, but adds safety.
     for i in range(len(results)):
         if results[i] is None:
-            # This indicates a worker failed catastrophically without setting a result.
-            # Try to get original op for context, might be tricky if queue is empty.
             original_op_info = ops[i][1] if i < len(ops) else {}
             phone = original_op_info.get('phone_number')
             email = original_op_info.get('email')
             logger.error(f"Result missing for index {i}. Worker likely crashed. Input: phone={phone}, email={email}")
-            results[i] = Result(False, None, ProxycurlException(f"Worker failed for index {i}"), phone, email)
-
+            # Populate with an error result
+            results[i] = Result(
+                success=False,
+                value=None,
+                error=ProxycurlException(f"Worker failed unexpectedly for index {i}"),
+                phone_number=phone, # Store identifiers even for crash
+                email=email
+            )
 
     return results
 
 
 async def _worker(queue: asyncio.Queue, results: list):
+    """Worker coroutine that processes jobs from the queue."""
     while True:
-        try:
-            # Get a job from the queue
-            index, op = await queue.get() # Use await queue.get() for proper async waiting
+        phone_number_for_result = None # Initialize identifier for this job
+        email_for_result = None      # Initialize identifier for this job
+        index = -1                   # Initialize index
+        op = None                    # Initialize op
 
-            # --- MODIFICATION: Extract input identifiers *before* the API call ---
+        try:
+            # Get a job from the queue (index, (api_func, params_dict))
+            index, op = await queue.get()
             op_func, op_params = op
-            phone_number = op_params.get('phone_number')
-            email = op_params.get('email')
-            # --- END MODIFICATION ---
+
+            # --- MODIFICATION START ---
+            # Determine the identifier used for THIS specific operation
+            # We expect op_params to contain EITHER phone_number OR email
+            phone_number_for_result = op_params.get('phone_number')
+            email_for_result = op_params.get('email')
+
+            # Optional sanity check: ensure only one identifier is present
+            if not ((phone_number_for_result is not None) ^ (email_for_result is not None)):
+                 logger.warning(
+                    f"Worker (index {index}): Operation parameters have unexpected identifiers. "
+                    f"Expected exactly one of phone_number/email. Got: "
+                    f"phone={phone_number_for_result}, email={email_for_result}. Proceeding anyway."
+                 )
+            # --- MODIFICATION END ---
 
             try:
-                # Perform the API call, which eventually calls the modified request()
-                response_object = await op_func(**op_params) # Should now consistently return the expected object or raise Exception
+                # Perform the actual API call using the specific function and its params
+                # request() is called within op_func implementation
+                response_object = await op_func(**op_params)
 
-                # If request() was successful and returned the expected object
+                # Success path: API call succeeded and response parsed correctly by request()
                 results[index] = Result(
                     success=True,
                     value=response_object,
                     error=None,
-                    phone_number=phone_number,
-                    email=email
+                    phone_number=phone_number_for_result, # Use the specific identifier for this op
+                    email=email_for_result               # Use the specific identifier for this op
                 )
 
             except Exception as e:
-                # Catches any exception raised by request() (network, API error, JSON error, TypeError from mapping)
-                # or any other error during the op_func call.
-                logger.warning(f"Operation failed for index {index} (phone={phone_number}, email={email}). Error: {e}")
+                # Failure path: Catches any exception from op_func -> request()
+                # (e.g., network error, timeout, API error status, JSON decode error, structure mismatch error)
+                logger.warning(f"Worker (index {index}): Operation failed. Identifier: phone={phone_number_for_result}, email={email_for_result}. Error: {type(e).__name__} - {e}")
                 results[index] = Result(
                     success=False,
                     value=None,
-                    error=e, # Store the actual exception
-                    phone_number=phone_number,
-                    email=email
+                    error=e, # Store the actual exception for later inspection
+                    phone_number=phone_number_for_result, # Still store the identifier that failed
+                    email=email_for_result               # Still store the identifier that failed
                 )
-            finally:
-                # Important: Signal that the task from the queue is done
-                queue.task_done()
 
         except asyncio.CancelledError:
             # Allow the worker to exit cleanly if cancelled
-            break
+            logger.debug("Worker cancelled.")
+            break # Exit the loop
+
         except Exception as e:
-            # Catch unexpected errors in the worker loop itself (e.g., queue issues)
-            logger.exception(f"Critical error in worker: {e}")
-            # Avoid breaking the loop if possible, but log it seriously.
-            # If queue.get() fails permanently, the loop might break anyway.
-            # Ensure task_done is called if an item was retrieved but processing failed badly.
-            # This path needs careful consideration based on desired robustness.
-            # For now, we log and continue/break depending on the error type.
-            # If it was related to queue.get(), breaking might be necessary.
-            # If it happened after getting the item, we might try to signal task_done if applicable.
-            # Let's assume for now that critical errors might cause the worker to stop.
-            break
+            # Catch unexpected errors *within the worker loop itself* (e.g., queue errors)
+            logger.exception(f"Critical error in worker loop (index {index}): {e}")
+            # If we got an item but failed critically processing it, try to record an error
+            if index != -1 and op is not None and results[index] is None:
+                 # Attempt to get identifiers again, might fail if op is malformed
+                 op_func, op_params = op
+                 phone_number_for_result = op_params.get('phone_number')
+                 email_for_result = op_params.get('email')
+                 results[index] = Result(False, None, ProxycurlException(f"Worker critical error: {e}"), phone_number_for_result, email_for_result)
+            # Decide whether to break or continue based on error severity
+            break # Let's break on critical worker errors for now
+
+        finally:
+            # Crucial: Ensure task_done is called IF an item was retrieved from the queue,
+            # regardless of whether processing succeeded or failed.
+            if op is not None:
+                try:
+                    queue.task_done()
+                except ValueError:
+                    # Can happen if task_done() is called too many times (shouldn't occur with this logic)
+                    # or potentially if the queue is already shut down.
+                    logger.warning(f"Worker (index {index}): queue.task_done() called inappropriately.")
+                except Exception as e:
+                    logger.error(f"Worker (index {index}): Error calling queue.task_done(): {e}")
