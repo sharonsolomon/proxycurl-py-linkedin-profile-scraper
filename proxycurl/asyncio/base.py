@@ -15,7 +15,10 @@ from typing import (
 )
 import logging
 
+
 logger = logging.getLogger(__name__)
+logger.critical("<<<<< RUNNING MODIFIED base.py - v2 >>>>>")
+
 
 T = TypeVar('T')
 Op = Tuple[Callable, Dict]
@@ -72,6 +75,8 @@ class ProxycurlBase:
         header_dic = {'Authorization': 'Bearer ' + self.api_key}
         backoff_in_seconds = 1
         last_exception = None # Keep track of the last exception
+        logger.critical("<<<<< Entered MODIFIED request method >>>>>")
+
 
         for i in range(0, self.max_retries):
             try:
